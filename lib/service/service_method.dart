@@ -27,11 +27,14 @@ Future getHomePageContent() async {
 Future getHomePageBelowContent() async {
   try {
     print('开始获取火爆专区数据.................');
+    print(servicePath['homePageBelowConten']);
     Response response;
     Dio dio = new Dio();
-    dio.options.contentType = ContentType.parse("application/json");
-    // int page = 1;
-    response = await dio.get(test);
+    dio.options.contentType =
+        ContentType.parse("application/x-www-form-urlencoded");
+    int page = 1;
+    response = await dio.post(servicePath['homePageBelowConten'], data: page);
+    print(response);
     if (response.statusCode == 200) {
       return response.data;
     } else {

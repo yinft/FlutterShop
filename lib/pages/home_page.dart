@@ -3,6 +3,7 @@ import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
@@ -26,6 +27,9 @@ class _HomePageState extends State<HomePage> {
                   (data['data']['category'] as List).cast(); // 顶部轮播组件数
               String picture =
                   data['data']['advertesPicture']['PICTURE_ADDRESS'];
+
+              String leaderImage = data['data']['shopInfo']['leaderImage'];
+              String leaderPhone = data['data']['shopInfo']['leaderPhone'];
               if (navgatorList.length > 10) {
                 navgatorList.removeRange(10, navgatorList.length);
               }
@@ -35,7 +39,9 @@ class _HomePageState extends State<HomePage> {
                   TopNavigator(
                     navgatorList: navgatorList,
                   ),
-                  AdBanner(picture: picture)
+                  AdBanner(picture: picture),
+                  LeaderPhone(
+                      leaderImage: leaderImage, ledaderPhone: leaderPhone)
                 ],
               );
             } else {
@@ -114,5 +120,33 @@ class AdBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(child: Image.network(picture));
+  }
+}
+
+//拨打电话组件
+class LeaderPhone extends StatelessWidget {
+  final String leaderImage; //店长图片
+  final String ledaderPhone; //店长电话
+  const LeaderPhone({Key key, this.leaderImage, this.ledaderPhone})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: InkWell(
+        onTap: _launchURL,
+        child: Image.network(leaderImage),
+      ),
+    );
+  }
+
+  void _launchURL() async {
+    String url = 'tel:' + ledaderPhone;
+    print(url);
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'url不能访问';
+    }
   }
 }

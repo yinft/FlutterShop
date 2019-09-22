@@ -35,7 +35,8 @@ class _HomePageState extends State<HomePage> {
               if (navgatorList.length > 10) {
                 navgatorList.removeRange(10, navgatorList.length);
               }
-              return Column(
+              return SingleChildScrollView(
+                  child: Column(
                 children: <Widget>[
                   SwiperDiy(swiperDataList: swiperDataList), //页面顶部轮播组件
                   TopNavigator(
@@ -46,7 +47,7 @@ class _HomePageState extends State<HomePage> {
                       leaderImage: leaderImage, ledaderPhone: leaderPhone),
                   Recommend(recommendList: recommendList)
                 ],
-              );
+              ));
             } else {
               return Center(
                 child: Text('加载中'),
@@ -181,7 +182,7 @@ class Recommend extends StatelessWidget {
       onTap: () {},
       child: Container(
         height: ScreenUtil().setHeight(330),
-        width: ScreenUtil().setWidth(330),
+        width: ScreenUtil().setWidth(250),
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
             color: Colors.white,
@@ -220,7 +221,7 @@ class Recommend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ScreenUtil().setHeight(380),
+      height: ScreenUtil().setHeight(400),
       margin: EdgeInsets.only(top: 10),
       child: Column(
         children: <Widget>[_titleWidget(), _recommedList()],

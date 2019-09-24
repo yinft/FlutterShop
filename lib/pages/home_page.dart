@@ -13,12 +13,13 @@ class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    var formData = {'lon': '115.02932', 'lat': '35.76189'};
     return Scaffold(
         appBar: AppBar(
           title: Text('小商店'),
         ),
         body: FutureBuilder(
-          future: getHomePageContent(),
+          future: request('homePageContent', formData),
           builder: (context, val) {
             if (val.hasData) {
               var data = json.decode(val.data.toString());
@@ -60,6 +61,7 @@ class _HomePageState extends State<HomePage>
                   FloorContent(floorGoodList: floor2),
                   FloorTitle(picture_address: floor3Title),
                   FloorContent(floorGoodList: floor3),
+                  HotGoods()
                 ],
               ));
             } else {
@@ -309,6 +311,27 @@ class FloorContent extends StatelessWidget {
         },
         child: Image.network(goods['image']),
       ),
+    );
+  }
+}
+
+class HotGoods extends StatefulWidget {
+  _HotGoodsState createState() => _HotGoodsState();
+}
+
+class _HotGoodsState extends State<HotGoods> {
+  @override
+  void initState() {
+    super.initState();
+    request('homePageBelowConten', 1).then((val) {
+      print(val);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Text('yinft'),
     );
   }
 }

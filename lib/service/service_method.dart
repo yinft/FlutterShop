@@ -4,7 +4,7 @@ import 'dart:io';
 import '../config/service_url.dart';
 
 //集成通用请求方法
-Future request(url, data) async {
+Future request(url, {data}) async {
   try {
     print('开始获取数据.................');
     Response response;

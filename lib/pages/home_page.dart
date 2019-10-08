@@ -4,6 +4,7 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 
 class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
@@ -11,6 +12,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin {
+  int page = 1;
+  List<Map> hotGoodList = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getHotGood();
+    print('开始初始化项目首页');
+  }
+
   @override
   Widget build(BuildContext context) {
     var formData = {'lon': '115.02932', 'lat': '35.76189'};
@@ -19,7 +31,7 @@ class _HomePageState extends State<HomePage>
           title: Text('小商店'),
         ),
         body: FutureBuilder(
-          future: request('homePageContent', formData),
+          future: request('homePageContent', data: formData),
           builder: (context, val) {
             if (val.hasData) {
               var data = json.decode(val.data.toString());
@@ -44,26 +56,28 @@ class _HomePageState extends State<HomePage>
               if (navgatorList.length > 10) {
                 navgatorList.removeRange(10, navgatorList.length);
               }
-              return SingleChildScrollView(
-                  child: Column(
-                children: <Widget>[
-                  SwiperDiy(swiperDataList: swiperDataList), //页面顶部轮播组件
-                  TopNavigator(
-                    navgatorList: navgatorList,
-                  ),
-                  AdBanner(picture: picture),
-                  LeaderPhone(
-                      leaderImage: leaderImage, ledaderPhone: leaderPhone),
-                  Recommend(recommendList: recommendList),
-                  FloorTitle(picture_address: floor1Title),
-                  FloorContent(floorGoodList: floor1),
-                  FloorTitle(picture_address: floor2Title),
-                  FloorContent(floorGoodList: floor2),
-                  FloorTitle(picture_address: floor3Title),
-                  FloorContent(floorGoodList: floor3),
-                  HotGoods()
-                ],
-              ));
+
+              return EasyRefresh(
+                child: ListView(
+                  children: <Widget>[
+                    SwiperDiy(swiperDataList: swiperDataList), //页面顶部轮播组件
+                    TopNavigator(
+                      navgatorList: navgatorList,
+                    ),
+                    AdBanner(picture: picture),
+                    LeaderPhone(
+                        leaderImage: leaderImage, ledaderPhone: leaderPhone),
+                    Recommend(recommendList: recommendList),
+                    FloorTitle(picture_address: floor1Title),
+                    FloorContent(floorGoodList: floor1),
+                    FloorTitle(picture_address: floor2Title),
+                    FloorContent(floorGoodList: floor2),
+                    FloorTitle(picture_address: floor3Title),
+                    FloorContent(floorGoodList: floor3),
+                    _hotGoods(),
+                  ],
+                ),
+              );
             } else {
               return Center(
                 child: Text('加载中'),
@@ -76,6 +90,82 @@ class _HomePageState extends State<HomePage>
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
+
+//获取热销商品数据
+  void _getHotGood() {
+    var formData = {'page', page};
+    request('homePageBelowConten', data: formData).then((val) {
+      var data = json.decode(val.toString());
+      List<Map> newGoodList = (data['data'] as List).cast();
+      setState(() {
+        hotGoodList.addAll(newGoodList);
+        page++;
+      });
+    });
+  }
+
+  Widget hotTitle = Container(
+    margin: EdgeInsets.only(top: 10),
+    padding: EdgeInsets.all(5),
+    alignment: Alignment.center,
+    color: Colors.transparent,
+    child: Text('火爆专区'),
+  );
+
+  Widget _getWrapList() {
+    if (hotGoodList.length != 0) {
+      List<Widget> listWidget = hotGoodList.map((val) {
+        return InkWell(
+          onTap: () {},
+          child: Container(
+            width: ScreenUtil().setWidth(372),
+            color: Colors.white,
+            padding: EdgeInsets.all(5),
+            margin: EdgeInsets.only(bottom: 2),
+            child: Column(
+              children: <Widget>[
+                Image.network(val['image'], width: ScreenUtil().setWidth(372)),
+                Text(
+                  val['name'],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: Colors.pink, fontSize: ScreenUtil().setSp(25)),
+                ),
+                Row(
+                  children: <Widget>[
+                    Text('￥${val['mallPrice']}'),
+                    Text(
+                      '￥${val['price']}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.black26,
+                          decoration: TextDecoration.lineThrough),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      }).toList();
+
+      return Wrap(
+        spacing: 2,
+        children: listWidget,
+      );
+    } else {
+      return Text('暂无火爆商品');
+    }
+  }
+
+  Widget _hotGoods() {
+    return Container(
+      child: Column(
+        children: <Widget>[hotTitle, _getWrapList()],
+      ),
+    );
+  }
 }
 
 // 首页轮播组件编写
@@ -311,27 +401,6 @@ class FloorContent extends StatelessWidget {
         },
         child: Image.network(goods['image']),
       ),
-    );
-  }
-}
-
-class HotGoods extends StatefulWidget {
-  _HotGoodsState createState() => _HotGoodsState();
-}
-
-class _HotGoodsState extends State<HotGoods> {
-  @override
-  void initState() {
-    super.initState();
-    request('homePageBelowConten', 1).then((val) {
-      print(val);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text('yinft'),
     );
   }
 }

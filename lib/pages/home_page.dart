@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyrefresh/material_footer.dart';
 import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
@@ -19,7 +20,6 @@ class _HomePageState extends State<HomePage>
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getHotGood();
     print('开始初始化项目首页');
   }
 
@@ -58,26 +58,43 @@ class _HomePageState extends State<HomePage>
               }
 
               return EasyRefresh(
-                child: ListView(
-                  children: <Widget>[
-                    SwiperDiy(swiperDataList: swiperDataList), //页面顶部轮播组件
-                    TopNavigator(
-                      navgatorList: navgatorList,
-                    ),
-                    AdBanner(picture: picture),
-                    LeaderPhone(
-                        leaderImage: leaderImage, ledaderPhone: leaderPhone),
-                    Recommend(recommendList: recommendList),
-                    FloorTitle(picture_address: floor1Title),
-                    FloorContent(floorGoodList: floor1),
-                    FloorTitle(picture_address: floor2Title),
-                    FloorContent(floorGoodList: floor2),
-                    FloorTitle(picture_address: floor3Title),
-                    FloorContent(floorGoodList: floor3),
-                    _hotGoods(),
-                  ],
-                ),
-              );
+                  child: ListView(
+                    children: <Widget>[
+                      SwiperDiy(swiperDataList: swiperDataList), //页面顶部轮播组件
+                      TopNavigator(
+                        navgatorList: navgatorList,
+                      ),
+                      AdBanner(picture: picture),
+                      LeaderPhone(
+                          leaderImage: leaderImage, ledaderPhone: leaderPhone),
+                      Recommend(recommendList: recommendList),
+                      FloorTitle(picture_address: floor1Title),
+                      FloorContent(floorGoodList: floor1),
+                      FloorTitle(picture_address: floor2Title),
+                      FloorContent(floorGoodList: floor2),
+                      FloorTitle(picture_address: floor3Title),
+                      FloorContent(floorGoodList: floor3),
+                      _hotGoods(),
+                    ],
+                  ),
+                  onLoad: () async {
+                    print('开始加载更多');
+                    var formPage = {'page': page};
+                    await request('homePageBelowConten', data: formPage)
+                        .then((val) {
+                      var data = json.decode(val.toString());
+                      List<Map> newGoodsList = (data['data'] as List).cast();
+                      setState(() {
+                        hotGoodList.addAll(newGoodsList);
+                        page++;
+                      });
+                    });
+                  },
+                  footer: ClassicalFooter(
+                    bgColor: Colors.white,
+                    textColor: Colors.pink,
+                    infoColor: Colors.pink,
+                  ));
             } else {
               return Center(
                 child: Text('加载中'),
@@ -92,17 +109,17 @@ class _HomePageState extends State<HomePage>
   bool get wantKeepAlive => true;
 
 //获取热销商品数据
-  void _getHotGood() {
-    var formData = {'page', page};
-    request('homePageBelowConten', data: formData).then((val) {
-      var data = json.decode(val.toString());
-      List<Map> newGoodList = (data['data'] as List).cast();
-      setState(() {
-        hotGoodList.addAll(newGoodList);
-        page++;
-      });
-    });
-  }
+  // void _getHotGood() {
+  //   var formData = {'page', page};
+  //   request('homePageBelowConten', data: formData).then((val) {
+  //     var data = json.decode(val.toString());
+  //     List<Map> newGoodList = (data['data'] as List).cast();
+  //     setState(() {
+  //       hotGoodList.addAll(newGoodList);
+  //       page++;
+  //     });
+  //   });
+  // }
 
   Widget hotTitle = Container(
     margin: EdgeInsets.only(top: 10),
